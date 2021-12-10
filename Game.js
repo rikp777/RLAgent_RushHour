@@ -14,21 +14,8 @@ class Game {
             [" ¤ "," ¤ "," ¤ "," ¤ "," ¤ "," ¤ "]
         ]
     }
-
-    findDuplicates(){
-    }
     isEmptySpace(position){
         if(position === " ¤ ") return true
-        return false
-    }
-    checkHorizontal(grid, N){
-        for(let i =0, k = N - 1; i < parseInt(N / 2, 10); i++, k--){
-            for(let j = 0; j < M; j++){
-                if(grid[i][j] != grid[j][i]){
-                    return true
-                }
-            }
-        }
         return false
     }
     checkHorizontalVertical(cars){
