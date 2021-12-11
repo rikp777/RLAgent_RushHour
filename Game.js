@@ -104,8 +104,8 @@ class Game {
     }
 
     isALegalMove(car, x, y){
-        const newPositionX = x
-        const newPositionY = y;
+        const newPositionX = x - 1
+        const newPositionY = y - 1;
         const selectedCar = car;
 
         const deltaR = newPositionY - car.y
@@ -156,9 +156,10 @@ class Game {
             }
         }
         if(selectedCar.orientation == "x"){
-            if(newPositionY != selectedCar.y)
+            if(newPositionY != selectedCar.y){
                 console.log("Your car is not in that x axis")
                 return 0
+            }
 
             if(deltaC > 0){
                 for(let i =0; i < deltaC; i++){
@@ -225,15 +226,54 @@ class Game {
 
     }
 
+    removeCar(car){
+        if(car.orientation == "x"){
+            for(let i = 0; i <= car.long; i++){
+                let yAxis = car.y
+                let xAxis = car.x + i
+                this.board[yAxis][xAxis] = " ¤ "
+            }
+        }
+        if(car.orientation == "y"){
+            for(let i = 0; i <= car.long; i++){
+                let yAxis = car.y + i
+                let xAxis = car.x
+                console.log(`Removing ${yAxis} ${xAxis}`)
+                this.board[yAxis][xAxis] = " ¤ "
+            }
+        }
+    }
+
     async moveCar() {
         const carId = await this.askQuestion("Input number of the car you want to move: ");
-        const x = await this.askQuestion("  Give x axes number: ");
-        const y = await this.askQuestion("  Give y axes number: ");
+        const newXPosition = await this.askQuestion("  Give x axes number: ");
+        const newYPosition = await this.askQuestion("  Give y axes number: ");
 
         const car = this.allCars.find(car => car.name == carId)
-        console.log(`You want to move car: [${car.name}] to position [${x}, ${y}]`)
-        if(this.isALegalMove(car, x - 1, y - 1) == 1){
-            console.log("Its legal im going to move your car")
+        console.log(`You want to move car: [${car.name}] to position [${newXPosition}, ${newYPosition}]`)
+        if(this.isALegalMove(car, newXPosition, newYPosition) == 1){
+            console.log("Its legal to make that move so i'm going to move your car")
+            let deltaR = newXPosition - car.x -1
+            let deltaC = newYPosition - car.y -1
+            let deltaRFront = newXPosition - (car.x + (car.long -1))
+            let deltaCFront = newYPosition - (car.y + (car.long -1))
+
+            this.removeCar(car)
+            if(car.orientation == "x"){
+                if(deltaR < 0){
+                    car.x += deltaRFront
+                }else if(deltaR > 0){
+                    car.x += deltaR
+                }
+            }
+            if(car.orientation == "y"){
+                if(deltaC < 0){
+                    car.y += deltaCFront
+                }else if(deltaC > 0){
+                    car.y += deltaC
+                }
+            }
+            this.updateBoard()
         }else{
             console.log("Can't move to that position")
         }
