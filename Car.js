@@ -6,8 +6,8 @@ class Car {
         this.coordinates = coordinates
         this.front = this.frontOfCar()
         this.rear = this.backOfCar()
-        this.x = this.coordinates[0][0]
-        this.y = this.coordinates[0][1]
+        this.x = this.coordinates[0][1]
+        this.y = this.coordinates[0][0]
     }
 
     backOfCar(){
