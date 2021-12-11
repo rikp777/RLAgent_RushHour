@@ -1,6 +1,17 @@
 const Car = require('./Car.js')
 const readline = require("readline");
 
+// Test game
+// ,
+//
+// "grid": [
+//     [" ¤ "," ¤ "," ¤ "," ¤ "," ¤ "," ¤ "],
+//     [" ¤ "," ¤ "," ¤ "," ¤ "," ¤ ",  3  ],
+//     [" ¤ ",  0  ,  0  ," ¤ "," ¤ ",  3  ],
+//     [  1  ," ¤ "," ¤ "," ¤ "," ¤ "," ¤ "],
+//     [  1  ," ¤ "," ¤ "," ¤ "," ¤ "," ¤ "],
+//     [" ¤ ",  10 ,  10 ," ¤ "," ¤ "," ¤ "]
+// ]
 class Game {
     constructor(){
         this.grid = this.loadGame()
@@ -14,6 +25,7 @@ class Game {
             [" ¤ "," ¤ "," ¤ "," ¤ "," ¤ "," ¤ "]
         ]
     }
+
     isEmptySpace(position){
         if(position === " ¤ ") return true
         return false
@@ -129,7 +141,7 @@ class Game {
                         }else{
                             return 0
                         }
-                    }else if(selectedCar.y + deltaR > 6){
+                    }else if(selectedCar.y + deltaR >= 5){
                         return 0
                     }else {
                         return 1
@@ -172,7 +184,7 @@ class Game {
                         }else {
                             return 0
                         }
-                    }else if(selectedCar.x + deltaR > 6){
+                    }else if(selectedCar.x + newPositionX >= 6){
                         return 0
                     }else {
                         return 1
@@ -217,13 +229,25 @@ class Game {
         this.allCars = this.carGeneration()
         this.updateBoard()
 
-        while (this.someoneWon != 1){
+        let moves = 0;
+        while (this.someoneWon(moves) != 1){
             await this.moveCar()
+            moves++
         }
     }
 
-    someoneWon(){
-
+    someoneWon(moves){
+        let redCar = this.allCars.find(car => car.name == 0)
+        if(redCar.x + (redCar.long -1) == 5 && moves != 0){
+            console.log(`That was your winning move! it took you only ${moves} moves`)
+            return 1
+        }else if(moves != 0){
+            console.log(`Not a winning move. This is your ${moves} move`)
+            return 0
+        }else{
+            console.log(`Make your first move. Good Luck!!`)
+            return 0
+        }
     }
 
     removeCar(car){
@@ -246,6 +270,10 @@ class Game {
 
     async moveCar() {
         const carId = await this.askQuestion("Input number of the car you want to move: ");
+        if(carId == -1) {
+            this.updateBoard()
+            return
+        }
         const newXPosition = await this.askQuestion("  Give x axes number: ");
         const newYPosition = await this.askQuestion("  Give y axes number: ");
 
