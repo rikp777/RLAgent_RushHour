@@ -116,14 +116,61 @@ class Game {
     }
 
     isALegalMove(car, x, y){
-        const newPositionX = x - 1
-        const newPositionY = y - 1;
+        const newPositionY = y; //row
+        const newPositionX = x; //col
         const selectedCar = car;
 
         const deltaR = newPositionY - car.y
         const deltaC = newPositionX - car.x
 
 
+
+
+        if(selectedCar.orientation == "x"){
+            if(newPositionY != selectedCar.y){
+                console.log("Your car is not in that x axis")
+                return 0
+            }
+
+            if(deltaC > 0){
+                for(let i = 0; i < deltaC; i++){
+                    let yAxis = selectedCar.y  // plus car lengte plus aantal zetten naar vertical top
+                    let xAxis = selectedCar.x + (selectedCar.rear + ( 1 + i ))
+                    let position = this.board[yAxis][xAxis]
+                    if(position != " ¤ "){
+                        if(position == selectedCar.name){
+                            console.log("pass")
+                            continue;
+                        }else{
+                            return 0
+                        }
+                    }else if(selectedCar.x + deltaC > 6){
+                        return 0
+                    }else {
+                        return 1
+                    }
+                }
+            }
+            else if(deltaC < 0){
+                for(let i =0; i < Math.abs(deltaC); i++){
+                    let yAxis = selectedCar.y
+                    let xAxis = selectedCar.x - (1 + i) // plus car lengte plus aantal zetten naar vertical top
+                    let position = this.board[yAxis][xAxis]
+                    if(position != " ¤ "){
+                        if(position == selectedCar.name){
+                            console.log("pass")
+                            continue
+                        }else{
+                            return 0
+                        }
+                    }else if(selectedCar.x + deltaC < 0){
+                        return 0
+                    }else {
+                        return 1
+                    }
+                }
+            }
+        }
         if(selectedCar.orientation == "y"){
             if(newPositionX != selectedCar.x){
                 console.log("Your car is not in that y axis")
@@ -131,17 +178,18 @@ class Game {
             }
 
             if(deltaR > 0){
-                for(let i = 0; i < deltaR; i++){
-                    let yAxis = selectedCar.x + (selectedCar.long -1) + (i -1) // plus car lengte plus aantal zetten naar vertical top
-                    let xAxis = selectedCar.x
+                for(let i =0; i < deltaR; i++){
+                    let yAxis = selectedCar.y + (selectedCar.long - 1) + (i + 1)
+                    let xAxis = selectedCar.x  // plus car lengte plus aantal zetten naar horizontaal recht
                     let position = this.board[yAxis][xAxis]
                     if(position != " ¤ "){
                         if(position == selectedCar.name){
                             console.log("pass")
-                        }else{
+                            continue
+                        }else {
                             return 0
                         }
-                    }else if(selectedCar.y + deltaR >= 5){
+                    }else if(selectedCar.y + deltaR > 6){
                         return 0
                     }else {
                         return 1
@@ -151,58 +199,16 @@ class Game {
             if(deltaR < 0){
                 for(let i =0; i < Math.abs(deltaR); i++){
                     let yAxis = selectedCar.y - (1 + i)
-                    let xAxis = selectedCar.x  // plus car lengte plus aantal zetten naar vertical top
+                    let xAxis = selectedCar.x  // plus aantal zetten naar horizontaal links
                     let position = this.board[yAxis][xAxis]
                     if(position != " ¤ "){
                         if(position == selectedCar.name){
                             console.log("pass")
-                        }else{
-                            return 0
-                        }
-                    }else if(selectedCar.y + deltaR < 0){
-                        return 0
-                    }else {
-                        return 1
-                    }
-                }
-            }
-        }
-        if(selectedCar.orientation == "x"){
-            if(newPositionY != selectedCar.y){
-                console.log("Your car is not in that x axis")
-                return 0
-            }
-
-            if(deltaC > 0){
-                for(let i =0; i < deltaC; i++){
-                    let yAxis = selectedCar.y
-                    let xAxis = selectedCar.x + (selectedCar.long -1) + (1 + i) // plus car lengte plus aantal zetten naar horizontaal recht
-                    let position = this.board[yAxis][xAxis]
-                    if(position != " ¤ "){
-                        if(position == selectedCar.name){
-
+                            continue
                         }else {
                             return 0
                         }
-                    }else if(selectedCar.x + newPositionX >= 6){
-                        return 0
-                    }else {
-                        return 1
-                    }
-                }
-            }
-            if(deltaC < 0){
-                for(let i =0; i < Math.abs(deltaC); i++){
-                    let yAxis = selectedCar.y
-                    let xAxis = selectedCar.x - (1 + i) // plus aantal zetten naar horizontaal links
-                    let position = this.board[yAxis][xAxis]
-                    if(position != " ¤ "){
-                        if(position == selectedCar.name){
-
-                        }else {
-                            return 0
-                        }
-                    }else if((selectedCar.y + deltaC) < 0){
+                    }else if((selectedCar.y + deltaR) < 0){
                         return 0
                     }else {
                         return 1
@@ -279,26 +285,30 @@ class Game {
 
         const car = this.allCars.find(car => car.name == carId)
         console.log(`You want to move car: [${car.name}] to position [${newXPosition}, ${newYPosition}]`)
-        if(this.isALegalMove(car, newXPosition, newYPosition) == 1){
+        if(this.isALegalMove(car, (newXPosition - 1), (newYPosition - 1)) == 1){
             console.log("Its legal to make that move so i'm going to move your car")
-            let deltaR = newXPosition - car.x -1
-            let deltaC = newYPosition - car.y -1
-            let deltaRFront = newXPosition - (car.x + (car.long -1))
-            let deltaCFront = newYPosition - (car.y + (car.long -1))
+            let deltaY = newYPosition - car.y //row
+            let deltaX = newXPosition - car.x //col
 
-            this.removeCar(car)
+            let deltaYFront = newYPosition - (car.y + (car.long -1))
+            let deltaXFront = newXPosition - (car.x + (car.long -1))
+
             if(car.orientation == "x"){
-                if(deltaR < 0){
-                    car.x += deltaRFront
-                }else if(deltaR > 0){
-                    car.x += deltaR
+                if(deltaX > 0){
+                    this.removeCar(car)
+                    car.x += deltaXFront
+                }else if(deltaX < 0){
+                    this.removeCar(car)
+                    car.x += deltaX
                 }
             }
-            if(car.orientation == "y"){
-                if(deltaC < 0){
-                    car.y += deltaCFront
-                }else if(deltaC > 0){
-                    car.y += deltaC
+            else if(car.orientation == "y"){
+                if(deltaY > 0){
+                    this.removeCar(car)
+                    car.y += deltaYFront
+                }else if(deltaY < 0){
+                    this.removeCar(car)
+                    car.y += deltaY
                 }
             }
             this.updateBoard()

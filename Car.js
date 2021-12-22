@@ -11,18 +11,18 @@ class Car {
     }
 
     backOfCar(){
-        if(this.orientation == "X") {
-            return this.coordinates[0][0]
+        if(this.orientation == "x") {
+            return this.x
         } else {
-            return this.coordinates[0][1]
+            return this.y
         }
     }
 
     frontOfCar(){
-        if(this.orientation == "X") {
-            return this.coordinates[0][0] + this.long
+        if(this.orientation == "x") {
+            return this.x + this.long
         } else {
-            return this.coordinates[0][1] + this.long
+            return this.y + this.long
         }
     }
 }
