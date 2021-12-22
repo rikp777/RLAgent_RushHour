@@ -14,20 +14,25 @@ const readline = require("readline");
 // ]
 class Game {
     constructor(){
+        this.emptySymbol = " ¤ "
         this.grid = this.loadGame()
         this.allCars = []
-        this.board = [
-            [" ¤ "," ¤ "," ¤ "," ¤ "," ¤ "," ¤ "],
-            [" ¤ "," ¤ "," ¤ "," ¤ "," ¤ "," ¤ "],
-            [" ¤ "," ¤ "," ¤ "," ¤ "," ¤ "," ¤ "],
-            [" ¤ "," ¤ "," ¤ "," ¤ "," ¤ "," ¤ "],
-            [" ¤ "," ¤ "," ¤ "," ¤ "," ¤ "," ¤ "],
-            [" ¤ "," ¤ "," ¤ "," ¤ "," ¤ "," ¤ "]
-        ]
+        this.board = []
+    }
+
+    initializeBoard(w, h, emptyVal){
+        let arr = [];
+        for(let i = 0; i < h; i++) {
+            arr[i] = [];
+            for(let j = 0; j < w; j++) {
+                arr[i][j] = emptyVal;
+            }
+        }
+        return arr
     }
 
     isEmptySpace(position){
-        if(position === " ¤ ") return true
+        if(position === this.emptySymbol) return true
         return false
     }
     checkHorizontalVertical(cars){
@@ -53,11 +58,13 @@ class Game {
                     car.positions.push([xIndex,yIndex])
                 }else{
                     if(!this.isEmptySpace(y)) {
-                        cars.push({
-                            id: y,
-                            increment: 1,
-                            positions: [[xIndex,yIndex]]
-                        })
+                        if(!isNaN(y)){
+                            cars.push({
+                                id: y,
+                                increment: 1,
+                                positions: [[xIndex,yIndex]]
+                            })
+                        }
                     }
                 }
             })
@@ -80,6 +87,10 @@ class Game {
         let allCars = []
         this.listOfCarPositions.forEach(carPosition => {
             let id = carPosition.id
+            if(isNaN(id)){
+                console.log("Empty position")
+                id = this.emptySymbol
+            }
             let orientation = carPosition.orientation
             let size = carPosition.increment
             let coordinates = carPosition.positions
@@ -137,7 +148,7 @@ class Game {
                     let yAxis = selectedCar.y  // plus car lengte plus aantal zetten naar vertical top
                     let xAxis = selectedCar.x + (selectedCar.rear + ( 1 + i ))
                     let position = this.board[yAxis][xAxis]
-                    if(position != " ¤ "){
+                    if(position != this.emptySymbol){
                         if(position == selectedCar.name){
                             console.log("pass")
                             continue;
@@ -156,7 +167,7 @@ class Game {
                     let yAxis = selectedCar.y
                     let xAxis = selectedCar.x - (1 + i) // plus car lengte plus aantal zetten naar vertical top
                     let position = this.board[yAxis][xAxis]
-                    if(position != " ¤ "){
+                    if(position != this.emptySymbol){
                         if(position == selectedCar.name){
                             console.log("pass")
                             continue
@@ -182,7 +193,7 @@ class Game {
                     let yAxis = selectedCar.y + (selectedCar.long - 1) + (i + 1)
                     let xAxis = selectedCar.x  // plus car lengte plus aantal zetten naar horizontaal recht
                     let position = this.board[yAxis][xAxis]
-                    if(position != " ¤ "){
+                    if(position != this.emptySymbol){
                         if(position == selectedCar.name){
                             console.log("pass")
                             continue
@@ -201,7 +212,7 @@ class Game {
                     let yAxis = selectedCar.y - (1 + i)
                     let xAxis = selectedCar.x  // plus aantal zetten naar horizontaal links
                     let position = this.board[yAxis][xAxis]
-                    if(position != " ¤ "){
+                    if(position != this.emptySymbol){
                         if(position == selectedCar.name){
                             console.log("pass")
                             continue
@@ -231,6 +242,11 @@ class Game {
     }
 
     async play(){
+        this.emptySymbol = " ੦ "
+        this.emptySymbol = " ᚕ "
+        this.emptySymbol = " ᚙ "
+        this.emptySymbol = " ▣ "
+        this.board = this.initializeBoard(6, 6, this.emptySymbol);
         this.listOfCarPositions = this.getDataFromGrid()
         this.allCars = this.carGeneration()
         this.updateBoard()
@@ -261,7 +277,7 @@ class Game {
             for(let i = 0; i <= car.long; i++){
                 let yAxis = car.y
                 let xAxis = car.x + i
-                this.board[yAxis][xAxis] = " ¤ "
+                this.board[yAxis][xAxis] = this.emptySymbol
             }
         }
         if(car.orientation == "y"){
@@ -269,7 +285,7 @@ class Game {
                 let yAxis = car.y + i
                 let xAxis = car.x
                 console.log(`Removing ${yAxis} ${xAxis}`)
-                this.board[yAxis][xAxis] = " ¤ "
+                this.board[yAxis][xAxis] = this.emptySymbol
             }
         }
     }
@@ -280,12 +296,14 @@ class Game {
             this.updateBoard()
             return
         }
-        const newXPosition = await this.askQuestion("  Give x axes number: ");
-        const newYPosition = await this.askQuestion("  Give y axes number: ");
+        const xInput = await this.askQuestion("  Give x axes number: ");
+        const yInput = await this.askQuestion("  Give y axes number: ");
 
+        let newXPosition = xInput - 1
+        let newYPosition = yInput - 1
         const car = this.allCars.find(car => car.name == carId)
         console.log(`You want to move car: [${car.name}] to position [${newXPosition}, ${newYPosition}]`)
-        if(this.isALegalMove(car, (newXPosition - 1), (newYPosition - 1)) == 1){
+        if(this.isALegalMove(car, newXPosition, newYPosition) == 1){
             console.log("Its legal to make that move so i'm going to move your car")
             let deltaY = newYPosition - car.y //row
             let deltaX = newXPosition - car.x //col
@@ -297,21 +315,25 @@ class Game {
                 if(deltaX > 0){
                     this.removeCar(car)
                     car.x += deltaXFront
+                    this.updateBoard()
                 }else if(deltaX < 0){
                     this.removeCar(car)
                     car.x += deltaX
+                    this.updateBoard()
                 }
             }
             else if(car.orientation == "y"){
                 if(deltaY > 0){
                     this.removeCar(car)
                     car.y += deltaYFront
+                    this.updateBoard()
                 }else if(deltaY < 0){
                     this.removeCar(car)
                     car.y += deltaY
+                    this.updateBoard()
                 }
             }
-            this.updateBoard()
+
         }else{
             console.log("Can't move to that position")
         }
@@ -331,3 +353,6 @@ class Game {
 }
 const game = new Game();
 game.play()
+
+
+
